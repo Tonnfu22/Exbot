@@ -1,6 +1,7 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from aiogram.filters.callback_data import CallbackData
 from config import BOT_TOKEN
 from exchange import get_exchange_rate
 from promo_codes import apply_promo_code
@@ -23,8 +24,8 @@ async def start(message: Message):
     await message.reply("Добро пожаловать в Crypto Exchange Bot!", reply_markup=main_menu())
 
 # Обработчик нажатия на кнопки
-@dp.callback_query_handler(lambda callback_query: True)
-async def handle_callback_query(callback_query: types.CallbackQuery):
+@dp.callback_query(CallbackData())
+async def handle_callback_query(callback_query: CallbackQuery):
     data = callback_query.data
 
     if data == "exchange":
@@ -37,7 +38,7 @@ async def handle_callback_query(callback_query: types.CallbackQuery):
         await callback_query.message.answer("Этот бот позволяет обменивать криптовалюты, проверять баланс и использовать промокоды.")
 
 # Обработчик текстовых сообщений (обмен и промокоды)
-@dp.message_handler()
+@dp.message()
 async def handle_text(message: Message):
     text = message.text.strip().split()
     
