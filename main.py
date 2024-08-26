@@ -24,7 +24,7 @@ async def start(message: Message):
     await message.reply("Добро пожаловать в Crypto Exchange Bot!", reply_markup=main_menu())
 
 # Обработчик нажатия на кнопки
-@dp.callback_query(CallbackData())
+@dp.callback_query()
 async def handle_callback_query(callback_query: CallbackQuery):
     data = callback_query.data
 
@@ -64,7 +64,7 @@ async def handle_text(message: Message):
         await message.reply("Пожалуйста, введите корректные данные.")
 
 async def main():
-    dp.start_polling(bot)
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
     import asyncio
