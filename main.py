@@ -5,7 +5,10 @@ from config import BOT_TOKEN
 from exchange import get_exchange_rate
 from promo_codes import apply_promo_code
 
+# Создание экземпляра бота
 bot = Bot(token=BOT_TOKEN)
+
+# Создание экземпляра диспетчера и передача бота
 dp = Dispatcher()
 
 # Создание главного меню
@@ -63,7 +66,8 @@ async def handle_text(message: Message):
         await message.answer("Пожалуйста, введите корректные данные.")
 
 async def main():
-    await dp.start_polling()
+    # Запуск опроса, передавая экземпляр бота
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
     import asyncio
