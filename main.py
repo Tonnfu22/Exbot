@@ -19,12 +19,12 @@ def main_menu():
     return keyboard
 
 # Обработчик команды /start
-@dp.message(Command("start"))
+@dp.message_handler(Command("start"))
 async def start(message: Message):
     await message.reply("Добро пожаловать в Crypto Exchange Bot!", reply_markup=main_menu())
 
 # Обработчик нажатия на кнопки
-@dp.callback_query()
+@dp.callback_query_handler()
 async def handle_callback_query(callback_query: CallbackQuery):
     data = callback_query.data
 
@@ -38,7 +38,7 @@ async def handle_callback_query(callback_query: CallbackQuery):
         await callback_query.message.answer("Этот бот позволяет обменивать криптовалюты, проверять баланс и использовать промокоды.")
 
 # Обработчик текстовых сообщений (обмен и промокоды)
-@dp.message()
+@dp.message_handler()
 async def handle_text(message: Message):
     text = message.text.strip().split()
     
