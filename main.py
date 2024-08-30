@@ -30,12 +30,14 @@ promo_codes = {
 user_promos = {}
 
 # Клавиатура для главного меню
-main_menu_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton("Обмен валют", callback_data="exchange")],
-    [InlineKeyboardButton("Пополнение баланса", callback_data="deposit")],
-    [InlineKeyboardButton("Вывод средств", callback_data="withdraw")],
-    [InlineKeyboardButton("Проверить баланс", callback_data="balance")]
-])
+main_menu_kb = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="Обмен валют", callback_data="exchange")],
+        [InlineKeyboardButton(text="Пополнение баланса", callback_data="deposit")],
+        [InlineKeyboardButton(text="Вывод средств", callback_data="withdraw")],
+        [InlineKeyboardButton(text="Проверить баланс", callback_data="balance")]
+    ]
+)
 
 # Обработчик команды /start
 @dp.message(Command("start"))
