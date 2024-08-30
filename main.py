@@ -1,6 +1,7 @@
-from aiogram import Bot, Dispatcher, executor, types
+from aiogram import Bot, Dispatcher, types
 from dotenv import load_dotenv
 import os
+import asyncio
 
 # Загружаем переменные из .env файла
 load_dotenv()
@@ -14,7 +15,7 @@ if not API_TOKEN:
 
 # Создаем экземпляр бота
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()
 
 # Словарь для хранения информации о пользователях
 users = {}
@@ -146,6 +147,10 @@ async def help_handler(message: types.Message):
                         "/balance - Проверить баланс\n"
                         "/help - Помощь")
 
-# Запуск поллинга
+async def main():
+    # Запуск бота
+    await bot.delete_webhook()
+    await dp.start_polling(bot)
+
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    asyncio.run(main())
