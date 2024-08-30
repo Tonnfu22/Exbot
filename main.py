@@ -1,6 +1,6 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from dotenv import load_dotenv
 import os
 import asyncio
@@ -29,6 +29,14 @@ promo_codes = {
 }
 user_promos = {}
 
+# Клавиатура для главного меню
+main_menu_kb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton("Обмен валют", callback_data="exchange")],
+    [InlineKeyboardButton("Пополнение баланса", callback_data="deposit")],
+    [InlineKeyboardButton("Вывод средств", callback_data="withdraw")],
+    [InlineKeyboardButton("Проверить баланс", callback_data="balance")]
+])
+
 # Обработчик команды /start
 @dp.message(Command("start"))
 async def send_welcome(message: Message):
@@ -38,10 +46,23 @@ async def send_welcome(message: Message):
         "promocode": None  # Промокод пользователя
     }
     await message.reply("Добро пожаловать в наш крипто-обменник!\n"
-                        "Для обмена валют используйте команду /exchange.\n"
-                        "Для использования промокода введите команду /promo [код].\n"
-                        "Для пополнения счета используйте команду /deposit.\n"
-                        "Для вывода средств используйте команду /withdraw.")
+                        "Выберите команду из меню ниже:", reply_markup=main_menu_kb)
+
+# Обработчик кнопок главного меню
+@dp.callback_query_handler(lambda c: c.data in ['exchange', 'deposit', 'withdraw', 'balance'])
+async def process_menu_buttons(callback_query: types.CallbackQuery):
+    action = callback_query.data
+    user_id = callback_query.from_user.id
+
+    if action == 'exchange':
+        await callback_query.message.answer("Введите сумму и валюты для обмена, например: /exchange 1 BTC ETH")
+    elif action == 'deposit':
+        await callback_query.message.answer("Введите сумму для пополнения, например: /deposit 1000")
+    elif action == 'withdraw':
+        await callback_query.message.answer("Введите сумму и адрес для вывода, например: /withdraw 1000 1A1zP1...n4MT5")
+    elif action == 'balance':
+        balance = users.get(user_id, {}).get("balance", 0)
+        await callback_query.message.answer(f"Ваш текущий баланс: {balance} единиц.")
 
 # Обработчик команды /promo
 @dp.message(Command("promo"))
@@ -76,20 +97,17 @@ async def exchange_handler(message: Message):
     from_currency = args[2].upper()
     to_currency = args[3].upper()
 
-    # Проверка баланса (пример placeholder)
     if users[user_id]["balance"] < amount:
         await message.reply("Недостаточно средств на балансе.")
         return
 
-    # Здесь может быть логика получения курса обмена, например, через API биржи
+    # Логика получения курса обмена
     example_rate = 30000  # Например, курс 1 BTC = 30000 USDT
     result = amount * example_rate
 
-    # Применение скидки, если промокод активен
     discount = user_promos.get(user_id, 0)
     final_result = result * (1 - discount)
 
-    # Обновляем баланс (пример placeholder)
     users[user_id]["balance"] -= amount
     await message.reply(f"Курс обмена: {example_rate}\n"
                         f"Вы получите: {final_result} {to_currency} (С учетом скидки {discount * 100}%)")
@@ -105,7 +123,7 @@ async def deposit_handler(message: Message):
         return
 
     amount = float(args[1])
-    users[user_id]["balance"] += amount  # Обновляем баланс пользователя
+    users[user_id]["balance"] += amount
 
     await message.reply(f"Ваш баланс пополнен на {amount} единиц. Текущий баланс: {users[user_id]['balance']} единиц.")
 
@@ -126,16 +144,8 @@ async def withdraw_handler(message: Message):
         await message.reply("Недостаточно средств на балансе.")
         return
 
-    # Обновляем баланс пользователя
     users[user_id]["balance"] -= amount
     await message.reply(f"Средства в размере {amount} единиц отправлены на адрес {address}. Текущий баланс: {users[user_id]['balance']} единиц.")
-
-# Обработчик команды /balance
-@dp.message(Command("balance"))
-async def balance_handler(message: Message):
-    user_id = message.from_user.id
-    balance = users[user_id]["balance"]
-    await message.reply(f"Ваш текущий баланс: {balance} единиц.")
 
 # Обработчик команды /help
 @dp.message(Command("help"))
