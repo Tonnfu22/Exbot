@@ -1,5 +1,5 @@
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command, Text
+from aiogram.filters import Command
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from dotenv import load_dotenv
 import os
@@ -51,19 +51,19 @@ async def send_welcome(message: Message):
                         "Выберите команду из меню ниже:", reply_markup=main_menu_kb)
 
 # Обработчик кнопок главного меню
-@dp.callback_query(Text(startswith="exchange"))
+@dp.callback_query(lambda c: c.data.startswith("exchange"))
 async def process_exchange(callback_query: CallbackQuery):
     await callback_query.message.answer("Введите сумму и валюты для обмена, например: /exchange 1 BTC ETH")
 
-@dp.callback_query(Text(startswith="deposit"))
+@dp.callback_query(lambda c: c.data.startswith("deposit"))
 async def process_deposit(callback_query: CallbackQuery):
     await callback_query.message.answer("Введите сумму для пополнения, например: /deposit 1000")
 
-@dp.callback_query(Text(startswith="withdraw"))
+@dp.callback_query(lambda c: c.data.startswith("withdraw"))
 async def process_withdraw(callback_query: CallbackQuery):
     await callback_query.message.answer("Введите сумму и адрес для вывода, например: /withdraw 1000 1A1zP1...n4MT5")
 
-@dp.callback_query(Text(startswith="balance"))
+@dp.callback_query(lambda c: c.data.startswith("balance"))
 async def process_balance(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     balance = users.get(user_id, {}).get("balance", 0)
