@@ -1,6 +1,5 @@
-from aiogram import Bot, types
-from aiogram.dispatcher import Dispatcher
-from aiogram.dispatcher.router import Router
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
 from aiogram.types import Message
 from dotenv import load_dotenv
 import os
@@ -18,9 +17,7 @@ if not API_TOKEN:
 
 # Создаем экземпляр бота
 bot = Bot(token=API_TOKEN)
-
-# Создаем экземпляр Router
-router = Router()
+dp = Dispatcher()
 
 # Словарь для хранения информации о пользователях
 users = {}
@@ -33,7 +30,7 @@ promo_codes = {
 user_promos = {}
 
 # Обработчик команды /start
-@router.message(commands=['start'])
+@dp.message(Command("start"))
 async def send_welcome(message: Message):
     user_id = message.from_user.id
     users[user_id] = {
@@ -47,7 +44,7 @@ async def send_welcome(message: Message):
                         "Для вывода средств используйте команду /withdraw.")
 
 # Обработчик команды /promo
-@router.message(commands=['promo'])
+@dp.message(Command("promo"))
 async def promo_handler(message: Message):
     user_id = message.from_user.id
     args = message.text.split()
@@ -66,7 +63,7 @@ async def promo_handler(message: Message):
         await message.reply("Промокод недействителен.")
 
 # Обработчик команды /exchange
-@router.message(commands=['exchange'])
+@dp.message(Command("exchange"))
 async def exchange_handler(message: Message):
     user_id = message.from_user.id
     args = message.text.split()
@@ -98,7 +95,7 @@ async def exchange_handler(message: Message):
                         f"Вы получите: {final_result} {to_currency} (С учетом скидки {discount * 100}%)")
 
 # Обработчик команды /deposit
-@router.message(commands=['deposit'])
+@dp.message(Command("deposit"))
 async def deposit_handler(message: Message):
     user_id = message.from_user.id
     args = message.text.split()
@@ -113,7 +110,7 @@ async def deposit_handler(message: Message):
     await message.reply(f"Ваш баланс пополнен на {amount} единиц. Текущий баланс: {users[user_id]['balance']} единиц.")
 
 # Обработчик команды /withdraw
-@router.message(commands=['withdraw'])
+@dp.message(Command("withdraw"))
 async def withdraw_handler(message: Message):
     user_id = message.from_user.id
     args = message.text.split()
@@ -134,14 +131,14 @@ async def withdraw_handler(message: Message):
     await message.reply(f"Средства в размере {amount} единиц отправлены на адрес {address}. Текущий баланс: {users[user_id]['balance']} единиц.")
 
 # Обработчик команды /balance
-@router.message(commands=['balance'])
+@dp.message(Command("balance"))
 async def balance_handler(message: Message):
     user_id = message.from_user.id
     balance = users[user_id]["balance"]
     await message.reply(f"Ваш текущий баланс: {balance} единиц.")
 
 # Обработчик команды /help
-@router.message(commands=['help'])
+@dp.message(Command("help"))
 async def help_handler(message: Message):
     await message.reply("Команды:\n"
                         "/start - Начало работы\n"
@@ -153,12 +150,7 @@ async def help_handler(message: Message):
                         "/help - Помощь")
 
 async def main():
-    # Создаем экземпляр Dispatcher
-    dp = Dispatcher()
-    dp.include_router(router)
-
     # Запуск бота
-    await bot.delete_webhook()
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
